@@ -17,13 +17,7 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|min:5',
-            'contact' => 'required|digits:9',
-            'email' => 'required|email|unique:contacts,email',
-        ]);
-
-        Contact::create($request->all());
+        $contact = Contact::create($request->all());
 
         return redirect()->route('contacts.index')->with('success', 'Contato criado com sucesso!');
     }
@@ -33,7 +27,8 @@ class ContactController extends Controller
      */
     public function index()
     {
-        //
+        $contacts = Contact::all();
+        return view('contacts.index', compact('contacts'));
     }
 
     /**
@@ -41,7 +36,7 @@ class ContactController extends Controller
      */
     public function create()
     {
-        //
+        return view('contacts.create');
     }
 
 
@@ -50,32 +45,44 @@ class ContactController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Contact $contact)
     {
-        //
+        return view('contacts.show', compact('contact'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Contact $contact)
     {
-        //
+        return view('contacts.edit', compact('contact'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Contact $contact)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:5',
+            'contact' => 'required|digits:9',
+            'email' => 'required|email|unique:contacts,email,' . $contact->id,
+        ]);
+
+        $contact->update($request->all());
+
+        return redirect()->route('contacts.show', $contact->id)->with('success', 'Contato atualizado com sucesso!');
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Contact $contact)
     {
-        //
+        $contact->delete();
+
+        return redirect()->route('contacts.index')->with('success', 'Contato removido com sucesso!');
     }
+
 }
